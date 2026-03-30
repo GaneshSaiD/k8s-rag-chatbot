@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 import os
-API_URL = os.getenv("API_URL", "http://localhost:8000/api/v1")
+API_URL = os.getenv("API_URL", "https://k8s-rag-chatbot-1.onrender.com/api/v1")
 
 st.set_page_config(
     page_title="K8s Ops AI Assistant",
