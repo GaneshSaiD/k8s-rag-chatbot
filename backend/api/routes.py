@@ -1,3 +1,4 @@
+import traceback
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from backend.rag.chain import ask
@@ -22,6 +23,7 @@ async def query_k8s(request: QueryRequest):
             sources=result["sources"]
         )
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/health")
