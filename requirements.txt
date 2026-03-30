@@ -5,7 +5,7 @@ langchain-openai
 langchain-community
 langchain-core
 langchain-text-splitters
-pinecone-client
+pinecone
 openai
 python-dotenv
 pydantic
