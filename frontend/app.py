@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
-
-API_URL = "http://localhost:8000/api/v1"
+import os
+API_URL = os.getenv("API_URL", "http://localhost:8000/api/v1")
 
 st.set_page_config(
     page_title="K8s Ops AI Assistant",
