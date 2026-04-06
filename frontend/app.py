@@ -34,7 +34,7 @@ if prompt := st.chat_input("Ask a Kubernetes question..."):
                 response = requests.post(
                     f"{API_URL}/query",
                     json={"question": prompt},
-                    timeout=30
+                    timeout=120
                 )
                 response.raise_for_status()
                 data = response.json()
