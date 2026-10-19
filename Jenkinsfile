@@ -69,7 +69,7 @@ pipeline {
 
     stage('Docker build') {
       steps {
-        sh 'docker build -t ${IMAGE} .'
+        sh 'docker build --pull -t ${IMAGE} .'
       }
     }
 

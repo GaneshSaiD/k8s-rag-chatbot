@@ -1,6 +1,8 @@
 # ---- build stage: install dependencies into an isolated virtualenv ----
-FROM python:3.11-slim AS build
-ENV PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
+# ---- runtime stage: only the venv and app code, running as non-root ----
+FROM python:3.11-slim
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+ENV PATH="/opt/venv/bin:$PATH" PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 COPY requirements.txt .
