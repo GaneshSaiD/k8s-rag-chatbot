@@ -61,7 +61,7 @@ FastAPI → LLM (GPT-4o / Claude) → Response → User
 | Chunking | RecursiveCharacterTextSplitter | 512-token chunks, 50 overlap |
 | Containerization | Docker | Portable deployment |
 | Orchestration | Kubernetes + Helm | Production deployment |
-| CI/CD | GitHub Actions | Automated build and deploy |
+| CI/CD | Jenkins + SonarQube + Trivy | Test, quality gate, image scan, Helm deploy |
 | Monitoring | Prometheus + Grafana | Latency, query volume tracking |
 
 ---
@@ -84,13 +84,11 @@ k8s-rag-chatbot/
 │   └── app.py                   # Streamlit chat UI
 ├── ingestion/
 │   └── ingest_k8s_docs.py       # One-time ingestion script
-├── k8s/
-│   ├── deployment.yaml          # K8s Deployment manifest
-│   ├── service.yaml             # K8s Service manifest
-│   └── helm/                    # Helm chart
-├── .github/
-│   └── workflows/
-│       └── ci-cd.yaml           # GitHub Actions pipeline
+├── tests/                       # pytest suite (mocks OpenAI/Pinecone)
+├── k8s/helm/k8s-rag-chatbot/    # Helm chart (Deployment, Service, probes)
+├── ci/                          # Local CI/CD lab: Jenkins, SonarQube, kind, registry
+├── Jenkinsfile                  # CI/CD pipeline definition
+├── sonar-project.properties     # SonarQube analysis config
 ├── Dockerfile
 ├── docker-compose.yml
 ├── requirements.txt
@@ -162,19 +160,15 @@ Services started:
 
 ---
 
-## ☸️ Deploy to Kubernetes
+## ☸️ CI/CD and Kubernetes Deployment
 
-```bash
-# Build and push image
-docker build -t your-dockerhub/k8s-rag-chatbot:latest .
-docker push your-dockerhub/k8s-rag-chatbot:latest
+Every push to `main` runs a Jenkins pipeline:
 
-# Deploy via Helm
-helm install k8s-rag ./k8s/helm \
-  --set image.repository=your-dockerhub/k8s-rag-chatbot \
-  --set secrets.openaiKey=$OPENAI_API_KEY \
-  --set secrets.pineconeKey=$PINECONE_API_KEY
 ```
+pytest → SonarQube quality gate → docker build → Trivy scan → push → helm upgrade --atomic → smoke test
+```
+
+Images are tagged with the git commit SHA, API keys come from a Kubernetes Secret (never Git), and a failed rollout rolls back automatically. The whole stack runs locally on kind — see **[ci/README.md](ci/README.md)** for setup.
 
 ---
 

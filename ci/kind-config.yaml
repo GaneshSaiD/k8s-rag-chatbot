@@ -1,0 +1,12 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: ci
+# Lets nodes resolve "localhost:5001" images through the local registry
+# (hosts.toml files are written by setup.sh).
+containerdConfigPatches:
+  - |-
+    [plugins."io.containerd.grpc.v1.cri".registry]
+      config_path = "/etc/containerd/certs.d"
+# Single node keeps memory low on an 8 GB laptop.
+nodes:
+  - role: control-plane

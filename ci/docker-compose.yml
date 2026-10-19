@@ -1,0 +1,71 @@
+# Local CI/CD lab: Jenkins + SonarQube (+ Postgres) + a local image registry.
+# Everything joins the "kind" Docker network so Jenkins can reach the kind
+# cluster's API server and the cluster can pull from the registry.
+# Start the kind cluster first (ci/setup.sh) — it creates that network.
+
+services:
+  jenkins:
+    build: ./jenkins
+    container_name: jenkins
+    user: root            # lab only: lets the pipeline use the host Docker socket
+    ports:
+      - "8080:8080"
+    environment:
+      JAVA_OPTS: "-Xmx768m"
+    mem_limit: 1200m
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+  sonarqube:
+    image: sonarqube:community
+    container_name: sonarqube
+    depends_on: [sonar-db]
+    ports:
+      - "9000:9000"
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://sonar-db:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+      # Small heaps so SonarQube fits on an 8 GB laptop
+      SONAR_WEB_JAVAOPTS: "-Xmx384m"
+      SONAR_CE_JAVAOPTS: "-Xmx384m"
+      SONAR_SEARCH_JAVAOPTS: "-Xms384m -Xmx384m"
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+    mem_limit: 1800m
+    volumes:
+      - sonar_data:/opt/sonarqube/data
+      - sonar_extensions:/opt/sonarqube/extensions
+    restart: unless-stopped
+
+  sonar-db:
+    image: postgres:16
+    container_name: sonar-db
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+      POSTGRES_DB: sonar
+    mem_limit: 256m
+    volumes:
+      - sonar_db:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  registry:
+    image: registry:2
+    container_name: kind-registry
+    ports:
+      - "127.0.0.1:5001:5000"
+    mem_limit: 128m
+    restart: unless-stopped
+
+volumes:
+  jenkins_home:
+  sonar_data:
+  sonar_extensions:
+  sonar_db:
+
+networks:
+  default:
+    name: kind
+    external: true

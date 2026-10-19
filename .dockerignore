@@ -1,0 +1,16 @@
+.git
+.github
+.devcontainer
+.env
+.venv
+__pycache__/
+*.pyc
+tests/
+ci/
+k8s/
+coverage.xml
+test-results.xml
+trivy-report.*
+.scannerwork/
+Jenkinsfile
+*.md

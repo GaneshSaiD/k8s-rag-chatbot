@@ -1,0 +1,41 @@
+replicaCount: 1
+
+image:
+  # Jenkins overrides repository and tag on every deploy (tag = git commit SHA).
+  repository: localhost:5001/k8s-rag-chatbot
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# API keys live in a Kubernetes Secret created outside Git (see ci/README.md).
+# The chart only references it, so no secret ever lands in the repo or Jenkins logs.
+existingSecret: k8s-rag-chatbot-secrets
+
+env:
+  PINECONE_INDEX: k8s-ops-assistant
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 192Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+probes:
+  path: /api/v1/health
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  fsGroup: 10001
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]

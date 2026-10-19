@@ -5,3 +5,10 @@ __pycache__/
 .DS_Store
 .venv/
 *.egg-info/
+
+# CI lab
+ci/kubeconfig-jenkins.yaml
+coverage.xml
+test-results.xml
+.scannerwork/
+trivy-report.*
