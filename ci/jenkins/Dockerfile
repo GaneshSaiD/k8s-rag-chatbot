@@ -8,8 +8,6 @@ USER root
 ARG KUBECTL_VERSION=v1.33.1
 ARG HELM_VERSION=v3.18.3
 ARG SONAR_SCANNER_VERSION=6.2.1.4610
-# Set automatically by BuildKit: amd64 on Intel/Windows, arm64 on Apple Silicon
-ARG TARGETARCH=amd64
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
       ca-certificates curl gnupg unzip python3 python3-venv python3-pip \
@@ -20,7 +18,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get update && apt-get install -y --no-install-recommends docker-ce-cli \
     && rm -rf /var/lib/apt/lists/*
 
-RUN SCANNER_ARCH=$([ "$TARGETARCH" = "arm64" ] && echo aarch64 || echo x64) \
+RUN TARGETARCH=$(dpkg --print-architecture) \
+    && SCANNER_ARCH=$([ "$TARGETARCH" = "arm64" ] && echo aarch64 || echo x64) \
     && curl -fsSLo /usr/local/bin/kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${TARGETARCH}/kubectl" \
     && chmod +x /usr/local/bin/kubectl \
     && curl -fsSL "https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz" | tar -xz -C /tmp \
